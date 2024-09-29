@@ -1,0 +1,20 @@
+app:
+  name: "my-app"
+  namespace: "app-namespace"
+  replicas: 2
+  container_name: "my-app-container"
+  image: "nginx:latest"
+  port: 80
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30000
+
+db:
+  configMapName: "db-config"
+  secretName: "app-secret"
+  database_name: "my_database"
+  database_host: "db-service"
+  username: dXNlcm5hbWU=  # base64 encoded
+  password: cGFzc3dvcmQ=  # base64 encoded
