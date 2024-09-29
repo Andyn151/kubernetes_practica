@@ -1,0 +1,45 @@
+app:
+  name: "my-app"
+  namespace: "app-namespace"
+  replicas: 2
+  container_name: "my-app-container"
+  image: "nginx:latest"
+  port: 80
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30000
+
+db:
+  statefulsetName: "my-database"
+  containerName: "mysql"
+  image: "mysql:5.7"
+  serviceName: "mysql-service"
+  replicas: 1
+  secretName: "db-secret"
+  storage: "1Gi"
+  rootPassword: "root_password"  # Helm se encargará de codificarlo en base64
+  username: "username"           # Helm codificará este valor
+  password: "password"           # Este valor también será codificado
+
+secret:
+  dbUsername: "username"
+  dbPassword: "password"
+
+configmap:
+  database_name: "my_database"
+  database_host: "mysql-service"
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: myapp.local
+      paths:
+        - path: /
+  tls: []
+
+

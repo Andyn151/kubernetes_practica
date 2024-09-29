@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: db-namespace
+spec:
+  selector:
+    app: db-app # Asegúrate de que coincide con el label del StatefulSet
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+
