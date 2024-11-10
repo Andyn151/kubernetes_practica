@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "my-helm-chart.name" -}}
+{{- define "kubernetes_practica.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "my-helm-chart.fullname" -}}
+{{- define "kubernetes_practica.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "my-helm-chart.chart" -}}
+{{- define "kubernetes_practica.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "my-helm-chart.labels" -}}
-helm.sh/chart: {{ include "my-helm-chart.chart" . }}
-{{ include "my-helm-chart.selectorLabels" . }}
+{{- define "kubernetes_practica.labels" -}}
+helm.sh/chart: {{ include "kubernetes_practica.chart" . }}
+{{ include "kubernetes_practica.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "my-helm-chart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "my-helm-chart.name" . }}
+{{- define "kubernetes_practica.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubernetes_practica.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "my-helm-chart.serviceAccountName" -}}
+{{- define "kubernetes_practica.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "my-helm-chart.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "kubernetes_practica.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

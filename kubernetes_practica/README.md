@@ -17,8 +17,6 @@ Instalar Minikube:
 brew install minikube
 O consulta la guía oficial para otros sistemas operativos.
 
-Instalar Kubectl:
-brew install kubectl
 
 Instalar Helm:
 brew install helm

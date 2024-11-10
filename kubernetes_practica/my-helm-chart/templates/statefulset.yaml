@@ -1,48 +1,46 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Values.db.statefulsetName }}
-  namespace: {{ .Values.app.namespace }}
+  name: {{ include "my-helm-chart.fullname" . }}-mariadb
+  labels:
+    {{- include "my-helm-chart.mariadbLabels" . | nindent 4 }}
 spec:
-  serviceName: "{{ .Values.db.serviceName }}"
-  replicas: {{ .Values.db.replicas }}
+  serviceName: {{ include "my-helm-chart.fullname" . }}-mariadb-headless
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.db.statefulsetName }}
+      {{- include "my-helm-chart.mariadbSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.db.statefulsetName }}
+        {{- include "my-helm-chart.mariadbSelectorLabels" . | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Values.db.containerName }}
-        image: {{ .Values.db.image }}
-        ports:
-        - containerPort: 3306
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.db.secretName }}
-              key: mysql-root-password
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.db.secretName }}
-              key: mysql-user
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.db.secretName }}
-              key: mysql-password
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
+        - name: mariadb
+          image: "{{ .Values.mariadb.image.repository }}:{{ .Values.mariadb.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadb.image.pullPolicy }}
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          envFrom:
+            - secretRef:
+                name: {{ include "my-helm-chart.fullname" . }}-mariadb-secret
+          volumeMounts:
+            - name: mariadb-storage
+              mountPath: /var/lib/mysql
   volumeClaimTemplates:
-  - metadata:
-      name: mysql-persistent-storage
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: {{ .Values.db.storage }}
+    - metadata:
+        name: mariadb-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+
+
+
+
+
+
+

@@ -1,45 +1,38 @@
 app:
-  name: "my-app"
-  namespace: "app-namespace"
-  replicas: 2
-  container_name: "my-app-container"
-  image: "nginx:latest"
-  port: 80
+  replicaCount: 2
 
-service:
-  type: NodePort
-  port: 80
-  nodePort: 30000
+  image:
+    repository: ghcr.io/ohmyplatform/fastapi-mariadb
+    tag: "main"
+    pullPolicy: IfNotPresent
 
-db:
-  statefulsetName: "my-database"
-  containerName: "mysql"
-  image: "mysql:5.7"
-  serviceName: "mysql-service"
-  replicas: 1
-  secretName: "db-secret"
-  storage: "1Gi"
-  rootPassword: "root_password"  # Helm se encargará de codificarlo en base64
-  username: "username"           # Helm codificará este valor
-  password: "password"           # Este valor también será codificado
+  ingress:
+    enabled: true
+    host: "keepcoding-127-0-0-1.nip.io" 
+    path: /
 
-secret:
-  dbUsername: "username"
-  dbPassword: "password"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
-configmap:
-  database_name: "my_database"
-  database_host: "mysql-service"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
 
-ingress:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
-  hosts:
-    - host: myapp.local
-      paths:
-        - path: /
-  tls: []
+mariadb:
+  image:
+    repository: mariadb
+    tag: "10.5"
+    pullPolicy: IfNotPresent
+  auth:
+    database: courses_db
+  persistence:
+    size: 1Gi
 
 

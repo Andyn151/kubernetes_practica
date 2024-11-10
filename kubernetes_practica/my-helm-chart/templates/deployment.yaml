@@ -1,55 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.app.name }}-deployment
-  namespace: {{ .Values.app.namespace }}
+  name: {{ include "my-helm-chart.fullname" . }}
+  labels:
+    {{- include "my-helm-chart.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.app.replicas }}
+  replicas: {{ .Values.app.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.app.name }}
+      {{- include "my-helm-chart.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.app.name }}
+        {{- include "my-helm-chart.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Values.app.container_name }}
-        image: {{ .Values.app.image }}
-        ports:
-        - containerPort: {{ .Values.app.port }}
-        env:
-        - name: DB_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.db.configMapName }}
-              key: database_name
-        - name: DB_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.db.configMapName }}
-              key: database_host
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.db.secretName }}
-              key: db-username
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.db.secretName }}
-              key: db-password
-        livenessProbe:
-          httpGet:
-            path: /
-            port: {{ .Values.app.port }}
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: {{ .Values.app.port }}
-          initialDelaySeconds: 10
-          periodSeconds: 5
-      restartPolicy: Always
+        - name: fastapi-app
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          envFrom:
+            - secretRef:
+                name: {{ include "my-helm-chart.fullname" . }}-secret
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+
 
