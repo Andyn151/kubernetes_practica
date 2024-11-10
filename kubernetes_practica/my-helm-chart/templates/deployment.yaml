@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-helm-chart.fullname" . }}
+  labels:
+    {{- include "my-helm-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "my-helm-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "my-helm-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: fastapi-app
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          envFrom:
+            - secretRef:
+                name: {{ include "my-helm-chart.fullname" . }}-secret
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+
+
